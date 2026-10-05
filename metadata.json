@@ -1,0 +1,6 @@
+{
+  "name": "Lumina - Unique Winning Products Store & Admin",
+  "description": "A high-converting e-commerce website featuring unique winning products with interactive galleries, verified customer reviews, seamless checkout, and a full-featured admin dashboard for managing products and orders.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

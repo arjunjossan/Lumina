@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { Order, OrderStatus, SupportInquiry, CustomerPortalTab } from '../../types';
 import { CUSTOMER_PROFILES_TABLE_SQL } from '../../lib/supabase';
+import { OrderTimelineProgress } from './OrderTimelineProgress';
+import { PackageTrackingMap } from './PackageTrackingMap';
 
 export const CustomerOrdersPage: React.FC = () => {
   const { 
@@ -1413,20 +1415,34 @@ export const CustomerOrdersPage: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Timeline */}
-                    <div className="space-y-4">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Carrier Checkpoints</h4>
-                      <div className="space-y-3 pl-2 border-l-2 border-amber-500 text-xs">
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-900">Package Dispatched from Fulfillment Facility</p>
-                          <p className="text-[11px] text-slate-500">In Transit with Carrier • Estimated: {searchedOrder.estimatedDelivery || '3-5 Days'}</p>
+                    {/* Visual Step-by-Step Progress Timeline */}
+                    <OrderTimelineProgress order={searchedOrder} />
+
+                    {/* Stylized Transit Map & Google Maps View (if tracking number is available) */}
+                    {searchedOrder.trackingNumber ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <Truck className="w-4 h-4 text-amber-500" />
+                            <span>Real-Time Package Transit & Route Map</span>
+                          </h4>
+                          <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                            GPS Active
+                          </span>
                         </div>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-900">Destination Address Verified</p>
-                          <p className="text-[11px] text-slate-500">{searchedOrder.shippingAddress.address}, {searchedOrder.shippingAddress.city}, {searchedOrder.shippingAddress.country}</p>
-                        </div>
+                        <PackageTrackingMap order={searchedOrder} />
                       </div>
-                    </div>
+                    ) : (
+                      <div className="bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-5 text-center space-y-2">
+                        <Clock className="w-6 h-6 text-amber-500 mx-auto animate-pulse" />
+                        <p className="text-xs font-bold text-slate-800">
+                          Tracking code pending courier dispatch scan
+                        </p>
+                        <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                          Live map routing will activate as soon as the carrier registers the initial waypoint pickup scan.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { ShimmerImage } from '../common/ShimmerImage';
+import { OrderTimelineProgress } from './OrderTimelineProgress';
+import { PackageTrackingMap } from './PackageTrackingMap';
 import { 
   Package, 
   Search, 
@@ -109,8 +111,11 @@ export const OrderTrackingPage: React.FC = () => {
     e.preventDefault();
     if (!query.trim()) return;
 
+    const q = query.trim().toLowerCase();
     const found = orders.find(
-      (o) => o.id.toLowerCase() === query.trim().toLowerCase() || o.customerEmail.toLowerCase() === query.trim().toLowerCase()
+      (o) => o.id.toLowerCase() === q || 
+             o.customerEmail.toLowerCase() === q ||
+             (o.trackingNumber && o.trackingNumber.toLowerCase() === q)
     );
 
     if (found) {
@@ -335,59 +340,42 @@ export const OrderTrackingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Visual Step Tracker */}
-            <div className="space-y-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Shipment Timeline Progress:</p>
-              
-              <div className="grid grid-cols-4 gap-2 relative">
-                {/* Connecting Line */}
-                <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-100 -translate-y-1/2 -z-0" />
+            {/* Visual Step-by-Step Progress Timeline */}
+            <OrderTimelineProgress order={searchedOrder} />
 
-                {/* Step 1: Placed */}
-                <div className="relative z-10 text-center space-y-2">
-                  <div className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center font-bold text-xs transition-all ${
-                    getStatusStep(searchedOrder.status) >= 1 ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-100' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    1
-                  </div>
-                  <p className="text-xs font-bold text-slate-900">Order Placed</p>
-                  <p className="text-[10px] text-slate-400">Confirmed</p>
+            {/* Stylized Transit Map & Google Maps View (if tracking number is available) */}
+            {searchedOrder.trackingNumber ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Truck className="w-4 h-4 text-amber-500" />
+                    <span>Real-Time Package Transit & Route Map</span>
+                  </h4>
+                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full">
+                    GPS Active
+                  </span>
                 </div>
-
-                {/* Step 2: Processing */}
-                <div className="relative z-10 text-center space-y-2">
-                  <div className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center font-bold text-xs transition-all ${
-                    getStatusStep(searchedOrder.status) >= 2 ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-100' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    2
-                  </div>
-                  <p className="text-xs font-bold text-slate-900">Processing</p>
-                  <p className="text-[10px] text-slate-400">Quality Inspection</p>
+                <PackageTrackingMap order={searchedOrder} />
+              </div>
+            ) : (
+              <div className="bg-slate-50 border border-dashed border-slate-200 rounded-3xl p-6 sm:p-8 text-center space-y-3">
+                <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mx-auto shadow-2xs">
+                  <Clock className="w-6 h-6 animate-pulse" />
                 </div>
-
-                {/* Step 3: Shipped */}
-                <div className="relative z-10 text-center space-y-2">
-                  <div className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center font-bold text-xs transition-all ${
-                    getStatusStep(searchedOrder.status) >= 3 ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-100' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    3
-                  </div>
-                  <p className="text-xs font-bold text-slate-900">In Transit</p>
-                  <p className="text-[10px] text-slate-400">Shipped with Tracking</p>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 font-serif">
+                    Courier Tracking Code Pending Dispatch
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
+                    Your order is currently being prepared and inspected in our fulfillment facility. As soon as the courier scans the parcel onto the linehaul vehicle, live interactive GPS mapping and tracking updates will activate here.
+                  </p>
                 </div>
-
-                {/* Step 4: Delivered */}
-                <div className="relative z-10 text-center space-y-2">
-                  <div className={`w-10 h-10 rounded-full mx-auto flex items-center justify-center font-bold text-xs transition-all ${
-                    getStatusStep(searchedOrder.status) >= 4 ? 'bg-emerald-500 text-white ring-4 ring-emerald-100' : 'bg-slate-200 text-slate-500'
-                  }`}>
-                    4
-                  </div>
-                  <p className="text-xs font-bold text-slate-900">Delivered</p>
-                  <p className="text-[10px] text-slate-400">At Destination</p>
+                <div className="inline-flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 text-[11px] text-slate-600 font-semibold shadow-2xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Carrier pickup guaranteed within 24 hours</span>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Destination & Items list */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 text-xs">
